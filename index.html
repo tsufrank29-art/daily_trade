@@ -340,13 +340,7 @@
     </header>
 
     <main>
-      <section class="landing" id="landing">
-        <h2>登入後即可查看交易日誌</h2>
-        <p>記錄每一筆進出場，優化你的交易策略</p>
-        <button class="btn btn-primary" id="openLogin">登入</button>
-      </section>
-
-      <section id="app" hidden>
+      <section id="app">
         <div class="toolbar">
           <div class="tabs">
             <button class="tab active" data-tab="journal">交易日誌</button>
@@ -366,14 +360,6 @@
         <div class="cards" id="cardList"></div>
       </section>
     </main>
-  </div>
-
-  <div class="modal" id="authModal" data-modal>
-    <div class="dialog">
-      <h3 id="authTitle">登入</h3>
-      <form id="authForm" class="form-grid"></form>
-      <div class="dialog-actions" id="authActions"></div>
-    </div>
   </div>
 
   <div class="modal" id="tradeModal" data-modal>
@@ -400,30 +386,22 @@
 
   <script>
     const state = {
-      isLoggedIn: false,
-      nickname: "",
+      nickname: "交易者",
       activeTab: "journal",
       filterDays: "all",
       tradeEditingId: null,
       planEditingId: null,
-      authMode: "login",
       trades: [],
       plans: [],
       nextId: 1,
     };
 
     const headerActions = document.getElementById("headerActions");
-    const landing = document.getElementById("landing");
     const app = document.getElementById("app");
     const cardList = document.getElementById("cardList");
     const pnlSummary = document.getElementById("pnlSummary");
     const primaryCta = document.getElementById("primaryCta");
     const dateFilter = document.getElementById("dateFilter");
-
-    const authModal = document.getElementById("authModal");
-    const authTitle = document.getElementById("authTitle");
-    const authForm = document.getElementById("authForm");
-    const authActions = document.getElementById("authActions");
 
     const tradeModal = document.getElementById("tradeModal");
     const tradeTitle = document.getElementById("tradeTitle");
@@ -521,25 +499,9 @@
 
     const renderHeader = () => {
       headerActions.innerHTML = "";
-      if (state.isLoggedIn) {
-        const greet = document.createElement("span");
-        greet.textContent = `Hi, ${state.nickname || "交易者"}`;
-        const logout = document.createElement("button");
-        logout.className = "btn btn-outline";
-        logout.textContent = "登出";
-        logout.addEventListener("click", () => {
-          state.isLoggedIn = false;
-          state.nickname = "";
-          resetView();
-        });
-        headerActions.append(greet, logout);
-      } else {
-        const login = document.createElement("button");
-        login.className = "btn btn-primary";
-        login.textContent = "登入";
-        login.addEventListener("click", () => openAuth("login"));
-        headerActions.append(login);
-      }
+      const greet = document.createElement("span");
+      greet.textContent = `Hi, ${state.nickname || "交易者"}`;
+      headerActions.append(greet);
     };
 
     const filteredByDate = (items) => {
@@ -697,86 +659,12 @@
 
     const render = () => {
       renderHeader();
-      if (!state.isLoggedIn) {
-        landing.hidden = false;
-        app.hidden = true;
-        return;
-      }
-      landing.hidden = true;
-      app.hidden = false;
       document.querySelectorAll(".tab").forEach((tab) => {
         tab.classList.toggle("active", tab.dataset.tab === state.activeTab);
       });
       primaryCta.textContent = state.activeTab === "journal" ? "新增交易紀錄" : "新增進出場規劃";
       renderSummary();
       renderCards();
-    };
-
-    const openAuth = (mode) => {
-      state.authMode = mode;
-      authTitle.textContent = mode === "login" ? "登入" : "註冊";
-      authForm.innerHTML = "";
-      authActions.innerHTML = "";
-
-      if (mode === "login") {
-        authForm.innerHTML = `
-          <label>電子郵件
-            <input type="email" name="email" required />
-          </label>
-          <label>密碼
-            <input type="password" name="password" required />
-          </label>
-        `;
-        const switchBtn = document.createElement("button");
-        switchBtn.type = "button";
-        switchBtn.className = "btn btn-outline";
-        switchBtn.textContent = "註冊";
-        switchBtn.addEventListener("click", () => openAuth("register"));
-        const loginBtn = document.createElement("button");
-        loginBtn.type = "submit";
-        loginBtn.className = "btn btn-primary";
-        loginBtn.textContent = "登入";
-        authActions.append(switchBtn, loginBtn);
-      } else {
-        authForm.innerHTML = `
-          <label>電子郵件
-            <input type="email" name="email" required />
-          </label>
-          <label>電話
-            <input type="tel" name="phone" />
-          </label>
-          <label>暱稱
-            <input type="text" name="nickname" required />
-          </label>
-          <label>密碼
-            <input type="password" name="password" required />
-          </label>
-          <label>確認密碼
-            <input type="password" name="confirm" required />
-          </label>
-        `;
-        const switchBtn = document.createElement("button");
-        switchBtn.type = "button";
-        switchBtn.className = "btn btn-outline";
-        switchBtn.textContent = "返回登入";
-        switchBtn.addEventListener("click", () => openAuth("login"));
-        const registerBtn = document.createElement("button");
-        registerBtn.type = "submit";
-        registerBtn.className = "btn btn-primary";
-        registerBtn.textContent = "註冊";
-        authActions.append(switchBtn, registerBtn);
-      }
-
-      authForm.onsubmit = (event) => {
-        event.preventDefault();
-        const data = new FormData(authForm);
-        state.nickname = data.get("nickname") || "交易者";
-        state.isLoggedIn = true;
-        closeAllModals();
-        render();
-      };
-
-      openModal(authModal);
     };
 
     const openTradeModal = (id = null) => {
@@ -952,7 +840,6 @@
       if (event.key === "Escape") closeAllModals();
     });
 
-    document.getElementById("openLogin").addEventListener("click", () => openAuth("login"));
     document.getElementById("homeTitle").addEventListener("click", resetView);
 
     document.querySelectorAll(".tab").forEach((tab) => {
